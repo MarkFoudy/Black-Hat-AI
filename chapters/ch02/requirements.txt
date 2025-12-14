@@ -1,0 +1,31 @@
+# Core dependencies
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# AI/ML frameworks (optional - install as needed)
+# Uncomment to use LangChain:
+# langchain>=0.1.0
+# langchain-openai>=0.0.5
+# openai>=1.0.0
+
+# Uncomment to use AutoGen:
+# pyautogen>=0.2.0
+
+# Development dependencies (optional)
+# pytest>=7.4.0
+# pytest-cov>=4.1.0
+# black>=23.0.0
+# ruff>=0.1.0
+# mypy>=1.7.0
+
+# To install all dependencies including optional ones:
+# pip install -e .[all]
+#
+# To install just LangChain support:
+# pip install -e .[langchain]
+#
+# To install just AutoGen support:
+# pip install -e .[autogen]
+#
+# To install development tools:
+# pip install -e .[dev]
