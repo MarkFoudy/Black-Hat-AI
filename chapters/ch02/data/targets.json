@@ -1,0 +1,7 @@
+[
+{"host": "api.dev.example.com", "status": 200, "title": "Dev API"},
+{"host": "staging.example.com", "status": 403, "title": "Forbidden"},
+{"host": "admin.example.com", "status": 401, "title": "Unauthorized"},
+{"host": "cdn.example.com", "status": 200, "title": "OK"}
+]
+  
