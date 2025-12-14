@@ -1,3 +1,6 @@
+from .message_observation import Message, Observation
+from .tool_schema import Tool
+
 class Agent:
     def plan(self, history: list[Message]) -> Message:
         """Generate the next action or reasoning step."""

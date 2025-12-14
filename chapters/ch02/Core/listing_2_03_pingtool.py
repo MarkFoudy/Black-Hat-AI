@@ -1,5 +1,7 @@
 import subprocess, json
 
+from typing import Dict, Any
+from .tool_schema import Tool
 
 class PingTool(Tool):
     name = "ping"
