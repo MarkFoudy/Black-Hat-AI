@@ -9,6 +9,12 @@ This repository is intended to:
 - provide runnable examples where appropriate
 - support experimentation and extension by readers
 
+## Contributions and Licensing
+
+This repository accompanies the book *Blackhat AI* (Manning Publications).
+
+Contributions to this repository are made for the purpose of supporting the book and its companion materials. Final editorial control and licensing of all content remains with the author.
+
 ---
 
 ## Repository Structure
