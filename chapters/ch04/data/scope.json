@@ -1,0 +1,15 @@
+{
+  "allowed": [
+    "example.com",
+    "*.example.com",
+    "test.local",
+    "*.test.local"
+  ],
+  "forbidden": [
+    "prod.*",
+    "*.prod.*",
+    "*.gov",
+    "payments.*",
+    "*.payments.*"
+  ]
+}
