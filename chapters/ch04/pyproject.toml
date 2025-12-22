@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blackhat-ai-ch04"
+version = "0.1.0"
+description = "Chapter 4: Passive Reconnaissance Agents - Companion code for Black Hat AI"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Black Hat AI Authors"}
+]
+keywords = ["ai", "security", "reconnaissance", "offensive-security", "red-team", "passive-recon"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "Topic :: Security",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+# Zero core dependencies - uses only stdlib
+dependencies = []
+
+[project.optional-dependencies]
+pydantic = [
+    "pydantic>=2.0.0",
+]
+cli = [
+    "rich>=13.0.0",
+    "typer>=0.9.0",
+    "python-dotenv>=1.0.0",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+]
+all = [
+    "blackhat-ai-ch04[pydantic,cli,dev]",
+]
+
+[project.urls]
+Homepage = "https://github.com/blackcat-labs/Black-Hat-AI"
+Repository = "https://github.com/blackcat-labs/Black-Hat-AI"
+Issues = "https://github.com/blackcat-labs/Black-Hat-AI/issues"
+
+[project.scripts]
+recon = "scripts.run_recon:main"
+analyze-recon = "scripts.analyze_results:main"
+
+[tool.setuptools]
+packages = ["src", "src.core", "src.recon", "src.safety", "scripts"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | build
+  | dist
+  | __pycache__
+)/
+'''
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+select = ["E", "F", "W", "I", "N", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=src --cov-report=term-missing"

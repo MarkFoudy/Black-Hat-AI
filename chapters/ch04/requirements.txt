@@ -1,0 +1,30 @@
+# Chapter 4: Passive Reconnaissance Agents
+# Core functionality requires NO external dependencies (stdlib only)
+
+# Optional: Enhanced validation and data modeling
+# pydantic>=2.0.0
+
+# Optional: Rich CLI output
+# rich>=13.0.0
+# typer>=0.9.0
+# python-dotenv>=1.0.0
+
+# Development dependencies
+# pytest>=7.4.0
+# pytest-cov>=4.1.0
+# pytest-mock>=3.12.0
+# black>=23.0.0
+# ruff>=0.1.0
+# mypy>=1.7.0
+
+# To install all dependencies including optional ones:
+# pip install -e .[all]
+#
+# To install just CLI enhancements:
+# pip install -e .[cli]
+#
+# To install just Pydantic support:
+# pip install -e .[pydantic]
+#
+# To install development tools:
+# pip install -e .[dev]
