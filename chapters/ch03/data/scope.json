@@ -1,0 +1,33 @@
+{
+  "engagement": {
+    "name": "Example Corp Security Assessment",
+    "start_date": "2025-01-01",
+    "end_date": "2025-12-31"
+  },
+  "authorized_domains": [
+    "example.com",
+    "test.local",
+    "lab.internal"
+  ],
+  "excluded_patterns": [
+    "prod",
+    "production",
+    "payment",
+    "core-db",
+    "customer",
+    "pii"
+  ],
+  "allowed_hours": {
+    "start": "07:00",
+    "end": "22:00",
+    "timezone": "UTC"
+  },
+  "allowed_days": [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday"
+  ],
+  "notes": "This is a sample scope file for demonstration purposes."
+}
