@@ -10,7 +10,7 @@ Provides base classes and models for:
 
 from .models import Message, Observation
 from .tool import Tool
-from .agent import Agent
+from .agent import Agent, MinimalAgent
 from .logger import ArtifactLogger
 
 __all__ = [
@@ -18,5 +18,6 @@ __all__ = [
     "Observation",
     "Tool",
     "Agent",
+    "MinimalAgent",
     "ArtifactLogger",
 ]
