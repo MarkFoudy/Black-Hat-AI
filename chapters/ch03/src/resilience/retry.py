@@ -1,7 +1,7 @@
 """
 Retry logic with exponential backoff.
 
-From Listing 3.8 in Black Hat AI.
+From Listing 3.1 in Black Hat AI.
 
 Provides automatic retry for transient failures in pipeline stages.
 """
@@ -46,7 +46,7 @@ def retry_stage(
     """
     Execute a pipeline stage with retry logic and exponential backoff.
 
-    From Listing 3.8 in Black Hat AI.
+    From Listing 3.1 in Black Hat AI.
 
     Automatically retries failed stage executions with increasing delays.
     The wait time doubles after each attempt (2s, 4s, 8s, ...) up to max_delay.

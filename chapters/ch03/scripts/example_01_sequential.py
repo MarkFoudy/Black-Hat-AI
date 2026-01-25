@@ -17,7 +17,7 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.agents import ReconAgent, TriageAgent, ReportAgent
+from src.agents import ReconAgent, ReconNormalizeAgent, TriageAgent, ReportAgent
 from src.core.artifact import PipelineArtifact
 
 
@@ -28,29 +28,36 @@ def main():
     print("=" * 60)
     print()
 
-    # Create agents (Listing 3.13 pattern)
+    # Create agents
     recon_agent = ReconAgent(name="recon")
+    normalize_agent = ReconNormalizeAgent(name="recon_normalize")
     triage_agent = TriageAgent(name="triage")
     report_agent = ReportAgent(name="report")
 
-    print("Pipeline: Recon -> Triage -> Report")
+    print("Pipeline: Recon -> Normalize -> Triage -> Report")
     print()
 
     # Execute sequentially (manual orchestration)
-    print("[1/3] Running Recon Agent...")
+    print("[1/4] Running Recon Agent...")
     recon_artifact = recon_agent.run(None)
-    print(f"      Found {recon_artifact.output['total_hosts']} hosts")
+    print(f"      Found {recon_artifact.output['total_hosts']} hosts (raw)")
     print()
 
-    print("[2/3] Running Triage Agent...")
-    triage_artifact = triage_agent.run(recon_artifact)
+    print("[2/4] Running Normalization Agent...")
+    normalize_artifact = normalize_agent.run(recon_artifact)
+    print(f"      Normalized {normalize_artifact.output['total_records']} records")
+    print(f"      Skipped {normalize_artifact.output['skipped']} invalid records")
+    print()
+
+    print("[3/4] Running Triage Agent...")
+    triage_artifact = triage_agent.run(normalize_artifact)
     summary = triage_artifact.output.get("summary", {})
     print(f"      High risk: {summary.get('high', 0)}")
     print(f"      Medium risk: {summary.get('medium', 0)}")
     print(f"      Low risk: {summary.get('low', 0)}")
     print()
 
-    print("[3/3] Running Report Agent...")
+    print("[4/4] Running Report Agent...")
     report_artifact = report_agent.run(triage_artifact)
     print(f"      Report generated at: {report_artifact.output.get('generated_at')}")
     print()

@@ -82,23 +82,14 @@ Every source file includes a comment indicating which listing from the book it c
 
 | Listing | Description | File Location |
 |---------|-------------|---------------|
-| 3.1 | WAF branching pipeline | `scripts/example_03_orchestrator.py` |
-| 3.2 | PipelineArtifact schema | `src/core/artifact.py` |
-| 3.3 | Artifact JSON example | `docs/listings_reference.md` |
-| 3.4 | PipelineOrchestrator | `src/core/orchestrator.py` |
-| 3.5 | Local gate (prod check) | `src/gates/environment_gate.py` |
-| 3.6 | GlobalGate (time-based) | `src/gates/global_gate.py` |
-| 3.7 | Gate integration loop | `src/core/orchestrator.py` |
-| 3.8 | Exponential backoff | `src/resilience/retry.py` |
-| 3.9 | Checkpointing | `src/resilience/checkpoint.py` |
-| 3.10 | Error alert hook | `src/resilience/alerts.py` |
-| 3.11 | Trace summarization | `src/visualization/trace.py` |
-| 3.12 | Mermaid export | `src/visualization/mermaid.py` |
-| 3.13 | Agent instantiation | `scripts/example_07_capstone.py` |
-| 3.14 | Pipeline creation | `scripts/example_07_capstone.py` |
-| 3.15 | Triage artifact example | `docs/listings_reference.md` |
-| 3.16 | Pipeline with error handling | `scripts/example_07_capstone.py` |
-| 3.17 | Mermaid export call | `scripts/example_06_visualization.py` |
+| 3.1 | Exponential backoff | `src/resilience/retry.py` |
+| 3.2 | Checkpointing | `src/resilience/checkpoint.py` |
+| 3.3 | Error count hook | `src/resilience/alerts.py` |
+| 3.4 | Trace summarization | `src/visualization/trace.py` |
+| 3.5 | Mermaid flowchart generator | `src/visualization/mermaid.py` |
+| 3.6 | ReconNormalizeAgent | `src/agents/recon_normalize.py` |
+| 3.7 | TriageAgent | `src/agents/triage.py` |
+| 3.8 | ReportAgent | `src/agents/report.py` |
 
 See [`docs/listings_reference.md`](docs/listings_reference.md) for detailed listing reference.
 

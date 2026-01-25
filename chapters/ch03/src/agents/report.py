@@ -1,7 +1,7 @@
 """
 Report agent for generating human-readable summaries.
 
-From Listing 3.13 in Black Hat AI.
+From Listing 3.8 in Black Hat AI.
 
 The ReportAgent consumes triage output and produces markdown reports
 suitable for executive summaries and technical documentation.
@@ -19,7 +19,7 @@ class ReportAgent(BaseStage):
     """
     Report agent that generates markdown summaries of findings.
 
-    From Listing 3.13 in Black Hat AI.
+    From Listing 3.8 in Black Hat AI.
 
     This agent transforms structured triage data into human-readable
     reports including:

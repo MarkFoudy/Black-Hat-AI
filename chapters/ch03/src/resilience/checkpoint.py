@@ -1,7 +1,7 @@
 """
 Checkpointing for resumable pipeline runs.
 
-From Listing 3.9 in Black Hat AI.
+From Listing 3.2 in Black Hat AI.
 
 Enables pipelines to save progress and resume from the last successful stage.
 """

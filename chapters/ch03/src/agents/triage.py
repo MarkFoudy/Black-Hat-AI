@@ -1,10 +1,11 @@
 """
 Triage agent for risk scoring and prioritization.
 
-From Listing 3.13 in Black Hat AI.
+From Listing 3.7 in Black Hat AI.
 
-The TriageAgent analyzes reconnaissance findings and ranks targets
-by exploitability and risk level.
+The TriageAgent analyzes normalized reconnaissance data and ranks targets
+by exploitability and risk level. It consumes structured output from
+ReconNormalizeAgent, not raw recon data.
 """
 
 from typing import Optional, List, Dict, Any
@@ -22,24 +23,32 @@ HIGH_RISK_KEYWORDS = {"admin", "staging", "dev", "test", "debug"}
 
 class TriageAgent(BaseStage):
     """
-    Triage agent that scores and prioritizes reconnaissance findings.
+    Triage agent that scores and prioritizes normalized findings.
 
-    From Listing 3.13 in Black Hat AI.
+    From Listing 3.7 in Black Hat AI.
 
-    This agent analyzes recon data and assigns risk scores based on:
+    This agent consumes NORMALIZED data from ReconNormalizeAgent and
+    assigns risk scores based on:
     - Open ports (databases, remote access, debug services)
     - HTTP headers (debug modes, version disclosure)
     - Hostname patterns (admin, staging, dev systems)
+    - Derived signals from normalization
 
     Findings are categorized as high, medium, or low risk.
+
+    This agent does NOT:
+    - Normalize or validate input data
+    - Perform additional reconnaissance
+    - Execute exploits or make modifications
 
     Attributes:
         name: "triage"
         risk_threshold: Minimum score for high-risk classification
 
     Example:
+        # After ReconNormalizeAgent
         triage = TriageAgent(risk_threshold=5)
-        artifact = triage.run(recon_artifact)
+        artifact = triage.run(normalized_artifact)
         print(artifact.output["high_risk"])
     """
 
@@ -65,15 +74,30 @@ class TriageAgent(BaseStage):
 
     def run(self, artifact: Optional[PipelineArtifact]) -> PipelineArtifact:
         """
-        Analyze and score reconnaissance findings.
+        Analyze and score normalized reconnaissance findings.
+
+        Expects input from ReconNormalizeAgent with "normalized" key.
+        Falls back to "findings" for backward compatibility.
 
         Args:
-            artifact: Recon artifact containing findings
+            artifact: Normalized recon artifact
 
         Returns:
             Artifact with scored and categorized findings
         """
-        if not artifact or "findings" not in artifact.output:
+        if not artifact:
+            return PipelineArtifact.from_previous(
+                previous=artifact,
+                stage=self.name,
+                output={"error": "No artifact provided", "high_risk": [], "medium_risk": [], "low_risk": []},
+                success=False,
+                error="No artifact provided",
+            )
+
+        # Prefer "normalized" key from ReconNormalizeAgent, fall back to "findings"
+        findings = artifact.output.get("normalized") or artifact.output.get("findings")
+
+        if not findings:
             return PipelineArtifact.from_previous(
                 previous=artifact,
                 stage=self.name,
@@ -81,8 +105,6 @@ class TriageAgent(BaseStage):
                 success=False,
                 error="No findings provided",
             )
-
-        findings = artifact.output["findings"]
         scored_findings = []
 
         for finding in findings:

@@ -1,7 +1,7 @@
 """
 Mermaid diagram generation for pipeline visualization.
 
-From Listing 3.12 in Black Hat AI.
+From Listing 3.5 in Black Hat AI.
 
 Generates Mermaid flowchart syntax for pipeline structure and execution.
 """
@@ -14,7 +14,7 @@ def export_mermaid(stages: List[Any]) -> None:
     """
     Print a Mermaid flowchart of the pipeline stages.
 
-    From Listing 3.12 in Black Hat AI.
+    From Listing 3.5 in Black Hat AI.
 
     Generates and prints a Mermaid flowchart LR (left-to-right) diagram
     showing the flow between pipeline stages.

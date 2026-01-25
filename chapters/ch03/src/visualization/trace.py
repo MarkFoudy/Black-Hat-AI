@@ -1,7 +1,7 @@
 """
 Trace summarization for pipeline runs.
 
-From Listing 3.11 in Black Hat AI.
+From Listing 3.4 in Black Hat AI.
 
 Provides functions to summarize and visualize pipeline execution traces.
 """
@@ -17,7 +17,7 @@ def summarize_run(run_dir: str) -> None:
     """
     Print a summary of all stages in a pipeline run.
 
-    From Listing 3.11 in Black Hat AI.
+    From Listing 3.4 in Black Hat AI.
 
     Reads all JSONL files in the run directory and prints a formatted
     trace showing timestamp, stage, and success status for each event.
