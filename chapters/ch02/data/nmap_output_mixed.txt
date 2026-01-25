@@ -1,0 +1,34 @@
+Host: prod-web.example.com
+  22/tcp    open  ssh     OpenSSH 8.2p1
+  80/tcp    open  http    Apache httpd 2.4.41
+  443/tcp   open  https   Apache httpd 2.4.41
+
+Host: staging-api.example.com
+  22/tcp    open  ssh     OpenSSH 7.6p1
+  8080/tcp  open  http    Tomcat 9.0.45
+  8443/tcp  open  https   Tomcat 9.0.45
+
+Host: dev-db.example.com
+  23/tcp    open  telnet
+  3306/tcp  open  mysql   MySQL 5.7.35
+
+Host: jenkins.example.com
+  22/tcp    open  ssh     OpenSSH 8.2p1
+  8080/tcp  open  http    Jetty 9.4.39
+
+Host: monitoring.example.com
+  22/tcp    open  ssh     OpenSSH 8.2p1
+  80/tcp    open  http    nginx 1.18.0
+  9090/tcp  open  http    Prometheus
+
+Host: cdn.example.com
+  80/tcp    open  http    Cloudflare
+  443/tcp   open  https   Cloudflare
+
+Host: internal-ftp.example.com
+  21/tcp    open  ftp     ProFTPD 1.3.6
+  22/tcp    open  ssh     OpenSSH 6.7p1
+
+Host: backup.example.com
+  22/tcp    open  ssh     OpenSSH 8.2p1
+  873/tcp   open  rsync   rsync 3.1.3

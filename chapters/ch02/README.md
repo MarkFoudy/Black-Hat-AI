@@ -1,52 +1,54 @@
-# Chapter 2: AI Agent Architecture
+# Chapter 2: Building Your First AI Agent
 
 Code companion for **Chapter 2** of *Black Hat AI: Offensive Security with Large Language Models*.
 
 ## Overview
 
-This chapter introduces the foundational architecture for AI-powered offensive security agents. You'll learn:
+This chapter teaches you to build AI agents from the ground up using **pure Python** without AI framework dependencies. You'll learn:
 
-- **Message/Observation Pattern**: Core data structures for agent communication
-- **Tool-Based Execution**: How agents interact with systems through tools
-- **Plan-Act-Reflect Cycle**: The reasoning loop that drives agent behavior
-- **Framework Adapters**: Integrating with LangChain and AutoGen
-- **Safety Controls**: Human-in-the-loop gates and kill switches for responsible usage
+- **What is an agent?**: How agents differ from scripts and LLMs
+- **Core Components**: Messages, tools, memory, controllers, and artifacts
+- **The ReAct Loop**: Reason → Act → Observe → Reflect → Record
+- **Minimal Agent Spec**: The smallest possible agent that still works
+- **Safety & Governance**: Gates, sandboxing, logging, and kill switches
+- **The Triage Agent**: A practical end-to-end reconnaissance workflow
+
+## Why No Frameworks?
+
+This chapter uses **pure Python** for clarity and portability:
+
+- ✅ **Clarity**: See exactly how agents work without framework abstractions
+- ✅ **Portability**: Code runs anywhere Python runs
+- ✅ **Educational**: Learn core concepts that transfer to any framework
+- ✅ **Simplicity**: Fewer dependencies, faster setup
+
+Later chapters introduce LangChain, AutoGen, and other frameworks once you understand the fundamentals.
 
 ## Quick Start
 
 ### 1. Install Dependencies
 
 ```bash
-# Install core dependencies
+# Install minimal dependencies (just pydantic + dotenv)
 pip install -r requirements.txt
-
-# OR install with optional framework support
-pip install -e .[langchain]  # LangChain support
-pip install -e .[autogen]    # AutoGen support
-pip install -e .[all]        # Everything including dev tools
 ```
 
-### 2. Configure API Keys
+No API keys required! All examples run locally without LLM calls.
+
+### 2. Run an Example
 
 ```bash
-# Copy the example environment file
-cp .env.example .env
-
-# Edit .env and add your OpenAI API key
-# OPENAI_API_KEY=your_api_key_here
-```
-
-### 3. Run an Example
-
-```bash
-# Example 1: Basic agent with LangChain
-python scripts/example_01_basic_agent.py
+# Example 1: Minimal agent (URL extraction)
+python scripts/example_01_minimal_agent.py
 
 # Example 2: Safety gates demonstration
 python scripts/example_02_safety_gate.py
 
-# Example 5: Artifact logging (works without API key)
+# Example 5: Artifact logging
 python scripts/example_05_artifact_logging.py
+
+# Example 8: NMAP triage workflow
+python scripts/example_08_nmap_triage.py
 ```
 
 ## Project Structure
@@ -55,29 +57,32 @@ python scripts/example_05_artifact_logging.py
 ch02/
 ├── src/                    # Core library code
 │   ├── core/               # Fundamental abstractions
-│   │   ├── models.py       # Message & Observation classes
-│   │   ├── tool.py         # Tool base class
-│   │   ├── agent.py        # Agent interface (plan/act/reflect)
-│   │   └── logger.py       # Artifact logging
+│   │   ├── models.py       # Message & Observation classes (Listing 2.1)
+│   │   ├── tool.py         # Tool base class (Listing 2.2)
+│   │   ├── agent.py        # MinimalAgent (Listing 2.6)
+│   │   └── logger.py       # Artifact logging (Listing 2.5)
 │   ├── tools/              # Tool implementations
-│   │   └── ping.py         # Network reachability tool
-│   ├── adapters/           # Framework integrations
-│   │   ├── langchain/      # LangChain adapter
-│   │   ├── autogen/        # AutoGen adapter
-│   │   └── selector.py     # Universal adapter selector
+│   │   ├── extract_urls.py      # URL extraction (Listing 2.3)
+│   │   ├── summarize_urls.py    # URL summarization (Listing 2.4)
+│   │   ├── nmap_parser.py       # NMAP output parser
+│   │   └── triage_analyzer.py   # Target prioritization
 │   └── safety/             # Safety mechanisms
-│       ├── gates.py        # Human-in-the-loop gates
-│       └── kill_switch.py  # Emergency stop
+│       ├── gates.py        # Human-in-the-loop gates (Listing 2.8)
+│       └── kill_switch.py  # Emergency stop (Listing 2.10)
 ├── scripts/                # Runnable examples
+│   ├── example_01_minimal_agent.py    # Listing 2.7
+│   ├── example_02_safety_gate.py      # Safety demo
+│   ├── example_05_artifact_logging.py # Logging demo
+│   └── example_08_nmap_triage.py      # Complete triage workflow
 ├── data/                   # Sample datasets
+│   ├── nmap_output.txt              # Listing 2.11 (from chapter)
+│   ├── nmap_output_clean.txt        # All modern services
+│   └── nmap_output_mixed.txt        # Realistic scenario
 ├── tests/                  # Unit tests
-├── docs/                   # Additional documentation
-├── logs/                   # Runtime logs
-└── runs/                   # Artifact outputs
-
+└── docs/                   # Additional documentation
 ```
 
-## Finding Code Listings
+## Code Listings
 
 Every source file includes a comment indicating which listing from the book it corresponds to.
 
@@ -85,100 +90,140 @@ Every source file includes a comment indicating which listing from the book it c
 |---------|-------------|---------------|
 | 2.1 | Message & Observation models | `src/core/models.py` |
 | 2.2 | Tool base class | `src/core/tool.py` |
-| 2.3 | PingTool implementation | `src/tools/ping.py` |
-| 2.4 | Agent interface (plan/act/reflect) | `src/core/agent.py` |
+| 2.3 | ExtractUrlsTool | `src/tools/extract_urls.py` |
+| 2.4 | SummarizeUrlsTool | `src/tools/summarize_urls.py` |
 | 2.5 | Artifact logger | `src/core/logger.py` |
-| 2.6 | LangChain agent adapter | `src/adapters/langchain/agent.py` |
-| 2.7 | LangChain ping tool | `src/adapters/langchain/tools.py` |
-| 2.8 | Agent execution example | `scripts/example_01_basic_agent.py` |
-| 2.9 | Memory/reflection | `scripts/example_04_memory_buffer.py` |
-| 2.10 | Safety gate | `src/safety/gates.py` + `scripts/example_02_safety_gate.py` |
-| 2.11 | AutoGen example | `scripts/example_03_autogen.py` |
-| 2.12 | AutoGen adapter | `src/adapters/autogen/agent.py` |
-| 2.13 | Universal adapter selector | `src/adapters/selector.py` |
-| 2.14 | Simple gate | `src/safety/gates.py` (simple_gate function) |
-| 2.15 | Artifact logging example | `scripts/example_05_artifact_logging.py` |
-| 2.16 | Global kill switch | `src/safety/kill_switch.py` |
-| 2.17 | Planning/reasoning | `scripts/example_06_planning.py` |
-| 2.18 | Reflection summary | `scripts/example_07_reflection.py` |
+| 2.6 | MinimalAgent | `src/core/agent.py` |
+| 2.7 | Running the agent | `scripts/example_01_minimal_agent.py` |
+| 2.8 | Safety gate | `src/safety/gates.py` |
+| 2.9 | Artifact record | `src/core/logger.py` (write method) |
+| 2.10 | Kill switch | `src/safety/kill_switch.py` |
+| 2.11 | NMAP output | `data/nmap_output.txt` |
+| 2.12 | Triage output | Generated by `scripts/example_08_nmap_triage.py` |
 
-See [`docs/listings_reference.md`](docs/listings_reference.md) for more details.
+See [`docs/listings_reference.md`](docs/listings_reference.md) for complete details.
 
 ## Running Examples
 
-### Example 1: Basic Agent Execution
+### Example 1: Minimal Agent
+
 ```bash
-python scripts/example_01_basic_agent.py
+python scripts/example_01_minimal_agent.py
 ```
-Demonstrates LangChain agent with ping tool checking reachability of hosts.
+
+Demonstrates the simplest possible agent using pure Python:
+- Extracts URLs from text using regex
+- Summarizes the extracted URLs
+- Logs all actions to JSONL artifact
+- **No LLM calls, no API keys required**
 
 ### Example 2: Safety Gates
+
 ```bash
 python scripts/example_02_safety_gate.py
 ```
-Shows human-in-the-loop control with prohibited host filtering.
 
-### Example 3: AutoGen Multi-Agent
-```bash
-python scripts/example_03_autogen.py
-```
-Multi-agent conversation using AutoGen framework.
-
-### Example 4: Memory Buffer
-```bash
-python scripts/example_04_memory_buffer.py
-```
-Conversation memory and reflection patterns (no API key needed).
+Shows human-in-the-loop control:
+- Blocks prohibited hosts automatically
+- Requires confirmation for risky actions
+- Demonstrates safety-first design
+- **No API keys required**
 
 ### Example 5: Artifact Logging
+
 ```bash
 python scripts/example_05_artifact_logging.py
 ```
-Structured audit logging to JSONL files (no API key needed).
 
-### Example 6: Planning & Reasoning
+Demonstrates structured audit logging:
+- JSONL format (one JSON object per line)
+- Unique run IDs for isolation
+- Complete action history
+- **No API keys required**
+
+### Example 8: NMAP Triage Agent
+
 ```bash
-python scripts/example_06_planning.py
+python scripts/example_08_nmap_triage.py
 ```
-Strategic triage and prioritization without taking actions.
 
-### Example 7: Reflection Summary
-```bash
-python scripts/example_07_reflection.py
+Complete end-to-end triage workflow from Section 2.6:
+- Parses saved nmap scan output (Listing 2.11)
+- Prioritizes targets based on risk indicators
+- Generates actionable triage report (Listing 2.12)
+- **Works entirely offline - no network requests**
+
+#### What It Does
+
+The triage agent reads nmap reconnaissance data and:
+
+1. **Flags unusual exposure**: Telnet, FTP, non-standard ports (8443, 8080)
+2. **Detects end-of-life software**: Apache 2.2, old OpenSSH versions
+3. **Spots odd combinations**: FTP + web server on same host
+4. **Groups by priority**: High/medium/low risk levels
+5. **Explains reasoning**: Every finding includes a clear explanation
+6. **Logs everything**: Complete audit trail in JSONL
+
+#### Example Output
+
 ```
-Generating summaries and identifying gaps in completed work.
+HIGH-INTEREST FINDINGS:
 
-## Using the Library in Your Code
+1. legacy.example.com
+   - Telnet (23/tcp) exposed publicly
+   - Apache httpd 2.2.34 (end-of-life)
+   Reason: Multiple legacy services on a public host
+
+2. files.example.com
+   - FTP (21/tcp) exposed alongside HTTP
+   Reason: Public FTP service paired with web server
+
+MEDIUM-INTEREST FINDINGS:
+
+1. api.example.com
+   - HTTPS service on 8443/tcp (Jetty 9.4.18)
+   Reason: Non-standard admin or management interface
+```
+
+## Using the Library
 
 ### Basic Tool Usage
 
 ```python
-from src.tools.ping import ping_host
+from src.tools.extract_urls import ExtractUrlsTool
 
-result = ping_host("example.com")
-print(f"Reachable: {result['reachable']}")
+tool = ExtractUrlsTool()
+result = tool.invoke({"text": "Check https://example.com"})
+print(result)  # {"urls": ["https://example.com"]}
 ```
 
-### Creating a LangChain Agent
+### Creating a Minimal Agent
 
 ```python
-from src.adapters.langchain.agent import build_langchain_agent
-from src.adapters.langchain.tools import ping_host_tool
+from src.core.logger import ArtifactLogger
+from src.core.agent import MinimalAgent
+from src.tools.extract_urls import ExtractUrlsTool
+from src.tools.summarize_urls import SummarizeUrlsTool
 
-agent = build_langchain_agent([ping_host_tool])
-result = agent("Check if example.com is online")
-print(result)
+logger = ArtifactLogger()
+agent = MinimalAgent(
+    tools=[ExtractUrlsTool(), SummarizeUrlsTool()],
+    logger=logger
+)
+
+result = agent.run("Visit https://example.com and https://test.com")
+print(result)  # {"count": 2, "summary": "Found 2 URLs."}
 ```
 
 ### Using Safety Gates
 
 ```python
 from src.safety.gates import safety_gate
-from src.tools.ping import ping_host
 
+# Automatically blocks prohibited hosts
 if safety_gate("ping", {"target": "example.com"}):
-    result = ping_host("example.com")
-    print(result)
+    # Only runs if approved
+    perform_action()
 ```
 
 ### Artifact Logging
@@ -191,13 +236,31 @@ with ArtifactLogger() as logger:
     # Logs written to runs/<uuid>.jsonl
 ```
 
+### NMAP Triage
+
+```python
+from src.tools.nmap_parser import NmapParserTool
+from src.tools.triage_analyzer import TriageAnalyzerTool
+
+# Parse nmap output
+parser = NmapParserTool()
+parsed = parser.invoke({"text": nmap_output})
+
+# Analyze and prioritize
+analyzer = TriageAnalyzerTool()
+analysis = analyzer.invoke(parsed)
+
+print(f"High priority: {analysis['summary']['high_count']}")
+print(f"Medium priority: {analysis['summary']['medium_count']}")
+```
+
 ## Development
 
 ### Running Tests
 
 ```bash
-# Install dev dependencies
-pip install -e .[dev]
+# Install dev dependencies first
+pip install pytest pytest-cov
 
 # Run all tests
 pytest
@@ -209,77 +272,92 @@ pytest --cov=src --cov-report=term-missing
 ### Code Formatting
 
 ```bash
+# Install formatters
+pip install black ruff
+
 # Format code
 black src/ scripts/ tests/
 
 # Lint
 ruff check src/ scripts/ tests/
-
-# Type checking
-mypy src/
 ```
 
 ## Key Concepts
 
-### Message/Observation Pattern
-- **Message**: Communication between components (user, agent, tool, system)
-- **Observation**: Structured result from tool execution
-- Enables clean separation of concerns and audit trails
+### The Minimal Agent
 
-### Plan-Act-Reflect Cycle
-1. **Plan**: Analyze history, decide next action
-2. **Act**: Execute action using tools
-3. **Reflect**: Process results, update memory
+- **No frameworks**: Pure Python orchestration
+- **No LLM calls**: All logic is explicit
+- **Tool coordination**: Sequential execution with logging
+- **Reproducible**: Same input = same output
+
+### The ReAct Loop
+
+1. **Reason**: Decide what to do (agent planning)
+2. **Act**: Execute action with tools
+3. **Observe**: Capture results
+4. **Reflect**: Update memory and state
+5. **Record**: Log everything to artifacts
 
 ### Safety-First Design
+
 - **Safety Gates**: Human approval before dangerous actions
+- **Sandboxing**: Isolated execution environments
+- **Comprehensive Logs**: Complete audit trails
+- **Kill Switches**: Emergency stop mechanisms
 - **Prohibited Hosts**: Automatic blocking of production systems
-- **Kill Switch**: Emergency stop for runaway agents
-- **Audit Logging**: Complete record of all actions
 
-## Architecture
+### The Triage Workflow
 
-See [`docs/architecture.md`](docs/architecture.md) for detailed design documentation.
+1. **Offline Only**: Never touches the network
+2. **Risk Scoring**: Automated priority assignment
+3. **Explainable**: Every decision has a clear reason
+4. **Actionable**: Produces focused target lists
+5. **Scalable**: Same logic for 10 or 10,000 hosts
 
 ## Security Considerations
 
 This code is designed for **authorized offensive security testing only**.
 
-- Never run against systems you don't own or have permission to test
-- Always use safety gates in production
-- Review logs regularly for unexpected behavior
-- Keep API keys secure (never commit .env)
-- Set `PROHIBITED_HOSTS` environment variable for your environment
+- ⚠️ Never run against systems you don't own or have permission to test
+- ✅ Always use safety gates in production
+- ✅ Review logs regularly for unexpected behavior
+- ✅ Keep credentials secure (never commit .env files)
+- ✅ Set `PROHIBITED_HOSTS` environment variable for your environment
 
 ## Troubleshooting
 
-### ImportError: No module named 'langchain'
+### Module not found errors
+
 ```bash
-pip install langchain langchain-openai
+# Ensure you're in the ch02 directory
+cd chapters/ch02
+
+# Run examples from the ch02 directory
+python scripts/example_01_minimal_agent.py
 ```
 
-### ImportError: No module named 'autogen'
-```bash
-pip install pyautogen
-```
+### Permission denied
 
-### ValueError: OPENAI_API_KEY not set
-```bash
-cp .env.example .env
-# Edit .env and add your API key
-```
-
-### Permission denied when running examples
 ```bash
 chmod +x scripts/*.py
 ```
 
+## What's Next?
+
+Chapter 2 teaches you the foundations. Later chapters build on this:
+
+- **Chapter 3**: Multi-agent pipelines and workflows
+- **Chapter 4**: Integration with AI frameworks (LangChain, AutoGen)
+- **Chapter 5**: Advanced reasoning and planning
+- **Chapter 6**: Tool calling and function execution
+- **Chapter 7**: Real-world penetration testing workflows
+
 ## Additional Resources
 
-- **Book**: *Black Hat AI* by [Authors]
-- **LangChain Docs**: https://python.langchain.com/
-- **AutoGen Docs**: https://microsoft.github.io/autogen/
-- **OpenAI API**: https://platform.openai.com/docs
+- **Book**: *Black Hat AI: Offensive Security with Large Language Models*
+- **Python Docs**: https://docs.python.org/3/
+- **Pydantic Docs**: https://docs.pydantic.dev/
 
 ## License
 

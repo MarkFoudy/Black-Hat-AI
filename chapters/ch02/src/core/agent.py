@@ -102,3 +102,79 @@ class Agent:
         raise NotImplementedError(
             f"{self.__class__.__name__} must implement the reflect() method"
         )
+
+
+class MinimalAgent:
+    """
+    Minimal agent implementation without framework dependencies.
+
+    From Listing 2.6 in Black Hat AI Chapter 2.
+
+    This agent demonstrates the simplest possible agent: it runs two tools
+    in sequence (extract URLs, then summarize them) without any LLM calls,
+    memory, or complex orchestration. All decision-making is explicit and
+    hardcoded.
+
+    The purpose is educational: to show the mechanics of agent execution
+    without framework abstractions obscuring the core concepts.
+
+    Example:
+        from src.core.logger import ArtifactLogger
+        from src.tools.extract_urls import ExtractUrlsTool
+        from src.tools.summarize_urls import SummarizeUrlsTool
+
+        logger = ArtifactLogger()
+        agent = MinimalAgent(
+            tools=[ExtractUrlsTool(), SummarizeUrlsTool()],
+            logger=logger
+        )
+        result = agent.run("Check https://example.com")
+        print(result)  # {"count": 1, "summary": "Found 1 URLs."}
+    """
+
+    def __init__(self, tools, logger):
+        """
+        Initialize the minimal agent.
+
+        Args:
+            tools: List of Tool instances to make available
+            logger: ArtifactLogger instance for recording actions
+        """
+        self.tools = {tool.name: tool for tool in tools}
+        self.logger = logger
+
+    def run(self, text: str):
+        """
+        Run the agent workflow on the provided text.
+
+        This is a hardcoded two-step workflow:
+        1. Extract URLs from the text
+        2. Summarize the extracted URLs
+
+        Each step is logged to the artifact logger for auditability.
+
+        Args:
+            text: Input text to process
+
+        Returns:
+            Dictionary with "count" and "summary" keys from the final step
+        """
+        # Step 1: Extract URLs
+        plan = "extract_urls"
+        observation_1 = self.tools[plan].invoke({"text": text})
+        self.logger.write({
+            "tool": plan,
+            "input": {"text": text},
+            "output": observation_1
+        })
+
+        # Step 2: Summarize URLs
+        plan = "summarize_urls"
+        observation_2 = self.tools[plan].invoke(observation_1)
+        self.logger.write({
+            "tool": plan,
+            "input": observation_1,
+            "output": observation_2
+        })
+
+        return observation_2
