@@ -1,7 +1,7 @@
 """
 Alert and monitoring hooks for pipeline observability.
 
-From Listing 3.10 in Black Hat AI.
+From Listing 3.3 in Black Hat AI.
 
 Provides error counting, threshold alerts, and monitoring integration.
 """

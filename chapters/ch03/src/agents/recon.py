@@ -1,10 +1,11 @@
 """
-Reconnaissance agent for target discovery.
-
-From Listing 3.13 in Black Hat AI.
+Reconnaissance agent for raw target discovery.
 
 The ReconAgent performs passive reconnaissance to discover targets and
-gather initial information about the attack surface.
+collect raw information about the attack surface. This agent focuses
+solely on data collection without normalization, scoring, or analysis.
+
+Output is passed to ReconNormalizeAgent for schema standardization.
 """
 
 from typing import Optional, List, Dict, Any
@@ -48,18 +49,25 @@ SYNTHETIC_RECON_DATA = {
 
 class ReconAgent(BaseStage):
     """
-    Reconnaissance agent that discovers targets and gathers information.
+    Reconnaissance agent that collects raw target data.
 
-    From Listing 3.13 in Black Hat AI.
-
-    This agent performs passive reconnaissance tasks:
+    This agent performs passive reconnaissance tasks to collect raw data:
     - Subdomain enumeration
     - Port discovery
-    - HTTP header analysis
+    - HTTP header collection
     - Technology fingerprinting
 
-    For demonstration, this uses synthetic data. In production, you would
-    integrate with real recon tools (subfinder, httpx, nmap, etc.).
+    This agent does NOT:
+    - Normalize or validate data structure
+    - Infer signals or derive indicators
+    - Score or prioritize findings
+    - Make recommendations
+
+    For demonstration, this uses synthetic data. In production, integrate
+    with real recon tools (subfinder, httpx, nmap, etc.).
+
+    Output is raw findings that require normalization by ReconNormalizeAgent
+    before being consumed by downstream agents like TriageAgent.
 
     Attributes:
         name: "recon"
@@ -68,11 +76,12 @@ class ReconAgent(BaseStage):
     Example:
         recon = ReconAgent(targets=["example.com"])
         artifact = recon.run(None)
+        # Raw findings ready for normalization
         print(artifact.output["findings"])
     """
 
     name = "recon"
-    description = "Performs passive reconnaissance to discover targets"
+    description = "Collects raw reconnaissance data from targets"
 
     def __init__(
         self,
@@ -95,11 +104,14 @@ class ReconAgent(BaseStage):
         """
         Execute reconnaissance on configured targets.
 
+        Collects raw data from recon tools. Output should be passed to
+        ReconNormalizeAgent for schema standardization before triage.
+
         Args:
             artifact: Previous stage output (typically None for recon)
 
         Returns:
-            Artifact containing discovered hosts, ports, and headers
+            Artifact containing raw findings (hosts, ports, headers)
         """
         # Get targets from artifact if provided
         if artifact and "targets" in artifact.output:

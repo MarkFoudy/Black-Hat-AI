@@ -22,7 +22,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.core.orchestrator import PipelineOrchestrator
-from src.agents import ReconAgent, TriageAgent, ReportAgent
+from src.agents import ReconAgent, ReconNormalizeAgent, TriageAgent, ReportAgent
 from src.gates import GlobalGate, EnvironmentGate, ScopeGate
 from src.visualization import export_mermaid
 from src.visualization.trace import get_run_summary
@@ -31,20 +31,22 @@ from src.visualization.trace import get_run_summary
 def main():
     """Run the complete capstone pipeline."""
     print("=" * 60)
-    print("Capstone: Recon -> Triage -> Report Pipeline")
+    print("Capstone: Recon -> Normalize -> Triage -> Report Pipeline")
     print("From Section 3.9 in Black Hat AI")
     print("=" * 60)
     print()
 
-    # Step 1: Define agents (Listing 3.13)
+    # Step 1: Define agents (Listings 3.6-3.8)
     print("Step 1: Creating agents")
     print("-" * 40)
 
     recon_agent = ReconAgent(name="recon", targets=["example.com"])
+    normalize_agent = ReconNormalizeAgent(name="recon_normalize")
     triage_agent = TriageAgent(name="triage", risk_threshold=5)
     report_agent = ReportAgent(name="report", output_dir="runs/reports")
 
     print(f"  - {recon_agent}")
+    print(f"  - {normalize_agent}")
     print(f"  - {triage_agent}")
     print(f"  - {report_agent}")
     print()
@@ -63,12 +65,12 @@ def main():
         print(f"  - {gate}")
     print()
 
-    # Step 3: Create orchestrator (Listing 3.14)
+    # Step 3: Create orchestrator
     print("Step 3: Creating orchestrator")
     print("-" * 40)
 
     pipeline = PipelineOrchestrator(
-        stages=[recon_agent, triage_agent, report_agent],
+        stages=[recon_agent, normalize_agent, triage_agent, report_agent],
         gates=gates,
         run_dir="runs",
     )
@@ -77,10 +79,10 @@ def main():
     print(f"  Artifact path: {pipeline.get_artifact_path()}")
     print()
 
-    # Step 4: Visualize pipeline structure (Listing 3.17)
+    # Step 4: Visualize pipeline structure
     print("Step 4: Pipeline structure (Mermaid)")
     print("-" * 40)
-    export_mermaid([recon_agent, triage_agent, report_agent])
+    export_mermaid([recon_agent, normalize_agent, triage_agent, report_agent])
     print()
 
     # Step 5: Execute pipeline (Listing 3.16)
@@ -147,10 +149,11 @@ def main():
     print()
     print("You have built a multi-agent security pipeline that:")
     print("  1. Discovers targets through reconnaissance")
-    print("  2. Triages findings by risk level")
-    print("  3. Generates executive reports")
-    print("  4. Enforces safety gates at each stage")
-    print("  5. Logs all actions for audit and replay")
+    print("  2. Normalizes raw data into structured schema")
+    print("  3. Triages findings by risk level")
+    print("  4. Generates executive reports")
+    print("  5. Enforces safety gates at each stage")
+    print("  6. Logs all actions for audit and replay")
     print()
     print("Next steps:")
     print("  - Add real reconnaissance tools (subfinder, httpx)")
