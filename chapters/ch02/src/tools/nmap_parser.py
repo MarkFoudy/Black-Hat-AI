@@ -16,8 +16,11 @@ from src.core.tool import Tool
 class NmapParserTool(Tool):
     """Parse simplified nmap output into structured data."""
 
-    name = "parse_nmap"
-    description = "Parse nmap scan output into structured host/service data"
+    def __init__(self) -> None:
+        super().__init__(
+            name="parse_nmap",
+            description="Parse nmap scan output into structured host/service data",
+        )
 
     def invoke(self, input: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -77,7 +80,7 @@ class NmapParserTool(Tool):
                 # Parse service line: "80/tcp    open  http    Apache httpd 2.4.41"
                 parts = line.split(None, 4)  # Split on whitespace, max 5 parts
 
-                if len(parts) >= 4:
+                if len(parts) >= 3:
                     # Parse port/protocol
                     port_proto = parts[0].split("/")
                     port = int(port_proto[0]) if port_proto[0].isdigit() else 0

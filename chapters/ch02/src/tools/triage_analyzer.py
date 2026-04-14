@@ -18,8 +18,11 @@ from src.core.tool import Tool
 class TriageAnalyzerTool(Tool):
     """Analyze parsed nmap data and prioritize targets."""
 
-    name = "analyze_triage"
-    description = "Prioritize reconnaissance targets based on risk indicators"
+    def __init__(self) -> None:
+        super().__init__(
+            name="analyze_triage",
+            description="Prioritize reconnaissance targets based on risk indicators",
+        )
 
     # Risk indicators from Section 2.6.3
     LEGACY_SERVICES = {

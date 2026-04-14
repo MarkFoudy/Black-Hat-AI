@@ -2,7 +2,7 @@
 """
 Artifact logging demonstration.
 
-From Listing 2.15 in Black Hat AI.
+From Listing 2.9 in Black Hat AI.
 
 Demonstrates:
 - Creating structured audit logs
@@ -64,21 +64,6 @@ def main():
     }
     logger.write(record2)
     print("✓ Logged: Port scan (success)")
-
-    # Action 3: Failed attempt
-    record3 = {
-        "run_id": logger.run_id,
-        "agent": "exploit",
-        "stage": "attack",
-        "timestamp": datetime.now().isoformat(),
-        "input": "Attempt SQLi on login form",
-        "output": None,
-        "error": "WAF detected and blocked request",
-        "approved_by": "operator@example.com",
-        "status": "blocked",
-    }
-    logger.write(record3)
-    print("✓ Logged: SQLi attempt (blocked)")
 
     # Close logger
     logger.close()

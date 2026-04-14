@@ -15,8 +15,11 @@ from src.core.tool import Tool
 class SummarizeUrlsTool(Tool):
     """Summarize extracted URLs."""
 
-    name = "summarize_urls"
-    description = "Generates a summary of extracted URLs"
+    def __init__(self) -> None:
+        super().__init__(
+            name="summarize_urls",
+            description="Generates a summary of extracted URLs",
+        )
 
     def invoke(self, input: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -26,19 +29,25 @@ class SummarizeUrlsTool(Tool):
             input: Dictionary with "urls" key containing list of URLs
 
         Returns:
-            Dictionary with "count" and "summary" keys
+            Dictionary with "count", "summary", and "urls" keys
+
+        Raises:
+            ValueError: If "urls" key is missing from input
 
         Example:
             >>> tool = SummarizeUrlsTool()
-            >>> result = tool.invoke({"urls": ["https://example.com", "https://test.com"]})
+            >>> result = tool.invoke({"urls": ["https://example.com"]})
             >>> result["count"]
-            2
+            1
             >>> result["summary"]
-            'Found 2 URLs.'
+            'Found 1 URLs.'
         """
-        urls = input.get("urls", [])
+        if "urls" not in input:
+            raise ValueError("SummarizeUrlsTool requires a 'urls' key in input")
+        urls = input["urls"]
         count = len(urls)
         return {
             "count": count,
-            "summary": f"Found {count} URLs."
+            "summary": f"Found {count} URLs.",
+            "urls": urls,
         }

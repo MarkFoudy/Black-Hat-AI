@@ -1,107 +1,16 @@
 """
-Agent interface defining the plan-act-reflect cycle.
+MinimalAgent implementation.
 
-From Listing 2.4 in Black Hat AI.
+From Listing 2.6 in Black Hat AI.
 
-This module defines the abstract Agent class that implements the core
-reasoning loop used by AI agents: planning, acting, and reflecting.
+This module defines MinimalAgent, the smallest possible agent that still
+exhibits core agent behaviors: orchestrating tools, recording observations,
+and producing reproducible results — all without an AI framework.
 """
 
-from typing import List, Optional
+from typing import List
 from .models import Message, Observation
 from .tool import Tool
-
-
-class Agent:
-    """
-    Abstract base class for AI agents using the plan-act-reflect pattern.
-
-    The agent lifecycle consists of three phases:
-    1. Plan: Analyze conversation history and decide next action
-    2. Act: Execute the planned action using available tools
-    3. Reflect: Process the observation and update internal state
-
-    Subclasses should implement these methods to create functional agents.
-
-    Example:
-        class MyAgent(Agent):
-            def plan(self, history: List[Message]) -> Message:
-                # Analyze history and generate next action
-                return Message(role="agent", content="...")
-
-            def act(self, plan: Message, tools: List[Tool]) -> Observation:
-                # Execute the planned action
-                return Observation(...)
-
-            def reflect(self, observation: Observation) -> Message:
-                # Process results and produce reflection
-                return Message(role="agent", content="...")
-    """
-
-    def plan(self, history: List[Message]) -> Optional[Message]:
-        """
-        Generate the next action or reasoning step.
-
-        Analyzes the conversation history to determine what the agent
-        should do next. This might involve:
-        - Deciding which tool to use
-        - Generating a reasoning step
-        - Formulating a response to the user
-
-        Args:
-            history: Complete conversation history up to this point
-
-        Returns:
-            Message containing the planned action, or None if no action needed
-
-        Raises:
-            NotImplementedError: If subclass doesn't implement this method
-        """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement the plan() method"
-        )
-
-    def act(self, plan: Message, tools: List[Tool]) -> Optional[Observation]:
-        """
-        Execute the planned action using an appropriate tool.
-
-        Takes the plan generated in the previous step and executes it
-        by selecting and invoking the appropriate tool from the available set.
-
-        Args:
-            plan: The planned action (from the plan() method)
-            tools: List of available tools the agent can use
-
-        Returns:
-            Observation containing the execution results, or None if no action taken
-
-        Raises:
-            NotImplementedError: If subclass doesn't implement this method
-        """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement the act() method"
-        )
-
-    def reflect(self, observation: Observation) -> Optional[Message]:
-        """
-        Update internal memory and produce a reflection message.
-
-        Processes the observation from the action step, updating any
-        internal state (memory, knowledge base) and generating a message
-        that captures what was learned.
-
-        Args:
-            observation: The result from the act() method
-
-        Returns:
-            Message containing the agent's reflection, or None
-
-        Raises:
-            NotImplementedError: If subclass doesn't implement this method
-        """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement the reflect() method"
-        )
 
 
 class MinimalAgent:
@@ -119,29 +28,29 @@ class MinimalAgent:
     without framework abstractions obscuring the core concepts.
 
     Example:
-        from src.core.logger import ArtifactLogger
-        from src.tools.extract_urls import ExtractUrlsTool
-        from src.tools.summarize_urls import SummarizeUrlsTool
-
-        logger = ArtifactLogger()
-        agent = MinimalAgent(
-            tools=[ExtractUrlsTool(), SummarizeUrlsTool()],
-            logger=logger
-        )
-        result = agent.run("Check https://example.com")
-        print(result)  # {"count": 1, "summary": "Found 1 URLs."}
+        with ArtifactLogger() as logger:
+            agent = MinimalAgent(
+                tools=[ExtractUrlsTool(), SummarizeUrlsTool()],
+                logger=logger,
+            )
+            result = agent.run(
+                "Check https://example.com and "
+                "https://admin.example.com/login"
+            )
+            print(result)
     """
 
-    def __init__(self, tools, logger):
+    def __init__(self, tools: List[Tool], logger) -> None:
         """
         Initialize the minimal agent.
 
         Args:
             tools: List of Tool instances to make available
-            logger: ArtifactLogger instance for recording actions
+            logger: ArtifactLogger instance for recording observations
         """
         self.tools = {tool.name: tool for tool in tools}
         self.logger = logger
+        self.history: List[Message] = []
 
     def run(self, text: str):
         """
@@ -151,30 +60,67 @@ class MinimalAgent:
         1. Extract URLs from the text
         2. Summarize the extracted URLs
 
-        Each step is logged to the artifact logger for auditability.
+        Every tool result is wrapped in an Observation and serialized with
+        .model_dump(mode='json') before logging.
 
         Args:
             text: Input text to process
 
         Returns:
-            Dictionary with "count" and "summary" keys from the final step
+            Dictionary with "count", "summary", and "urls" keys
         """
+        self.history.append(Message(role="user", content=text))
+
         # Step 1: Extract URLs
-        plan = "extract_urls"
-        observation_1 = self.tools[plan].invoke({"text": text})
-        self.logger.write({
-            "tool": plan,
-            "input": {"text": text},
-            "output": observation_1
-        })
+        try:
+            step_1_output = self.tools["extract_urls"].invoke({"text": text})
+            obs_1 = Observation(
+                tool_name="extract_urls",
+                input={"text": text},
+                output=step_1_output,
+                success=True,
+            )
+        except Exception as e:
+            obs_1 = Observation(
+                tool_name="extract_urls",
+                input={"text": text},
+                output={},
+                success=False,
+                error=str(e),
+            )
+            self.logger.write(obs_1.model_dump(mode="json"))
+            raise
+
+        self.logger.write(obs_1.model_dump(mode="json"))
 
         # Step 2: Summarize URLs
-        plan = "summarize_urls"
-        observation_2 = self.tools[plan].invoke(observation_1)
-        self.logger.write({
-            "tool": plan,
-            "input": observation_1,
-            "output": observation_2
-        })
+        try:
+            step_2_output = self.tools["summarize_urls"].invoke(step_1_output)
+            obs_2 = Observation(
+                tool_name="summarize_urls",
+                input=step_1_output,
+                output=step_2_output,
+                success=True,
+            )
+        except Exception as e:
+            obs_2 = Observation(
+                tool_name="summarize_urls",
+                input=step_1_output,
+                output={},
+                success=False,
+                error=str(e),
+            )
+            self.logger.write(obs_2.model_dump(mode="json"))
+            raise
 
-        return observation_2
+        self.logger.write(obs_2.model_dump(mode="json"))
+
+        self.history.append(
+            Message(
+                role="agent",
+                content=step_2_output["summary"],
+                meta=step_2_output,
+            )
+        )
+
+        return step_2_output

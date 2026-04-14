@@ -16,8 +16,11 @@ from src.core.tool import Tool
 class ExtractUrlsTool(Tool):
     """Extract URLs from text using regex."""
 
-    name = "extract_urls"
-    description = "Extracts HTTP/HTTPS URLs from text input"
+    def __init__(self) -> None:
+        super().__init__(
+            name="extract_urls",
+            description="Extracts HTTP/HTTPS URLs from text input",
+        )
 
     def invoke(self, input: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -29,12 +32,17 @@ class ExtractUrlsTool(Tool):
         Returns:
             Dictionary with "urls" key containing list of extracted URLs
 
+        Raises:
+            ValueError: If "text" key is missing from input
+
         Example:
             >>> tool = ExtractUrlsTool()
             >>> result = tool.invoke({"text": "Visit https://example.com"})
             >>> result["urls"]
             ['https://example.com']
         """
-        text = input.get("text", "")
-        urls = re.findall(r"https?://[^\s]+", text)
+        if "text" not in input:
+            raise ValueError("ExtractUrlsTool requires a 'text' key in input")
+        text = input["text"]
+        urls = re.findall(r"https?://[^\s,)>\]]+", text)
         return {"urls": urls}
