@@ -10,13 +10,6 @@ actions without human approval. Critical for offensive security tools.
 from typing import Dict, Any
 
 
-_PROHIBITED_TARGETS = {
-    "prod.example.com",
-    "payment.example.com",
-    "core-db.example.com",
-}
-
-
 def safety_gate(action: str, context: Dict[str, Any]) -> bool:
     """
     Safety gate with prohibited target filtering and user confirmation.
@@ -44,18 +37,17 @@ def safety_gate(action: str, context: Dict[str, Any]) -> bool:
         else:
             print("Action blocked by safety gate")
     """
+    prohibited_targets = {
+        "prod.example.com",
+        "payment.example.com",
+        "core-db.example.com",
+    }
+
     target = context.get("target", "")
 
-    if target in _PROHIBITED_TARGETS:
-        print(f"[Gate] Blocked: {target} is a prohibited target.")
+    if target in prohibited_targets:
+        print(f"[Gate] BLOCKED: {target}")
         return False
 
     confirm = input(f"[Gate] Approve '{action}' on {target}? (y/n): ")
-    approved = confirm.lower().startswith("y")
-
-    if approved:
-        print(f"[Gate] Approved: {action} on {target}")
-    else:
-        print(f"[Gate] Denied: {action} on {target}")
-
-    return approved
+    return confirm.lower().startswith("y")

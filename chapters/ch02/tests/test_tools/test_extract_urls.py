@@ -39,6 +39,11 @@ class TestExtractUrlsTool:
         with pytest.raises(ValueError, match="'text'"):
             self.tool.invoke({})
 
+    def test_none_text_value_raises(self):
+        """Explicit None value for 'text' should also raise ValueError."""
+        with pytest.raises(ValueError, match="'text'"):
+            self.tool.invoke({"text": None})
+
     def test_extract_urls_with_paths(self):
         text = "Login at https://admin.example.com/login"
         result = self.tool.invoke({"text": text})

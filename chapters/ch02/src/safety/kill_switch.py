@@ -8,7 +8,6 @@ immediately stop all agent activity in emergency situations.
 """
 
 import threading
-from typing import Optional
 
 
 class KillSwitch:
@@ -28,34 +27,19 @@ class KillSwitch:
 
         while not kill_switch.is_active:
             perform_action()
-
-    Note:
-        - Monitor thread runs as daemon (won't prevent program exit)
-        - Type "STOP" (case-insensitive) to activate
-        - Once activated, cannot be deactivated (safety feature)
-        - EOFError is handled gracefully for non-interactive stdin
     """
 
     def __init__(self) -> None:
-        """Initialize the kill switch in inactive state."""
         self._stop_event = threading.Event()
-        self._monitor_thread: Optional[threading.Thread] = None
 
     @property
     def is_active(self) -> bool:
-        """Return True if the kill switch has been activated."""
         return self._stop_event.is_set()
 
     def _monitor(self) -> None:
-        """
-        Monitor loop that runs in background daemon thread.
-
-        Waits for "STOP" input and sets the stop event when received.
-        Handles EOFError for non-interactive stdin (pipes, test harnesses).
-        """
         while not self._stop_event.is_set():
             try:
-                cmd = input("[KillSwitch] Type 'STOP' to abort: ")
+                cmd = input()
                 if cmd.strip().upper() == "STOP":
                     self._stop_event.set()
                     print("[KillSwitch] ACTIVATED — aborting all agents.")
@@ -64,26 +48,4 @@ class KillSwitch:
                 break
 
     def start(self) -> None:
-        """
-        Start the kill switch monitor in a background daemon thread.
-
-        Raises:
-            RuntimeError: If monitor is already running
-        """
-        if self._monitor_thread and self._monitor_thread.is_alive():
-            raise RuntimeError("Kill switch monitor is already running")
-
-        self._monitor_thread = threading.Thread(
-            target=self._monitor, daemon=True
-        )
-        self._monitor_thread.start()
-        print("[KillSwitch] Monitor started (type STOP to abort)")
-
-    def __enter__(self):
-        """Context manager entry - starts monitoring."""
-        self.start()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Context manager exit."""
-        pass
+        threading.Thread(target=self._monitor, daemon=True).start()

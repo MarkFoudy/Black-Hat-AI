@@ -41,8 +41,8 @@ class ExtractUrlsTool(Tool):
             >>> result["urls"]
             ['https://example.com']
         """
-        if "text" not in input:
+        text = input.get("text")
+        if text is None:
             raise ValueError("ExtractUrlsTool requires a 'text' key in input")
-        text = input["text"]
         urls = re.findall(r"https?://[^\s,)>\]]+", text)
         return {"urls": urls}

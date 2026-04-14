@@ -41,9 +41,8 @@ class ArtifactLogger:
         """
         os.makedirs(run_dir, exist_ok=True)
         self.run_id = str(uuid.uuid4())
-        self._file = open(
-            f"{run_dir}/{self.run_id}.jsonl", "w", encoding="utf8"
-        )
+        self.path = os.path.join(run_dir, f"{self.run_id}.jsonl")
+        self._file = open(self.path, "w", encoding="utf-8")
 
     def write(self, record: Dict[str, Any]) -> None:
         """

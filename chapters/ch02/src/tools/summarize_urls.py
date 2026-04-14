@@ -42,12 +42,11 @@ class SummarizeUrlsTool(Tool):
             >>> result["summary"]
             'Found 1 URLs.'
         """
-        if "urls" not in input:
+        urls = input.get("urls")
+        if urls is None:
             raise ValueError("SummarizeUrlsTool requires a 'urls' key in input")
-        urls = input["urls"]
-        count = len(urls)
         return {
-            "count": count,
-            "summary": f"Found {count} URLs.",
+            "count": len(urls),
+            "summary": f"Found {len(urls)} URL(s).",
             "urls": urls,
         }

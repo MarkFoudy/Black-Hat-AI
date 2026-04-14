@@ -18,26 +18,31 @@ class TestSummarizeUrlsTool:
     def test_summarize_single_url(self):
         result = self.tool.invoke({"urls": ["https://example.com"]})
         assert result["count"] == 1
-        assert result["summary"] == "Found 1 URLs."
+        assert result["summary"] == "Found 1 URL(s)."
         assert result["urls"] == ["https://example.com"]
 
     def test_summarize_multiple_urls(self):
         urls = ["https://example.com", "http://test.com", "https://admin.com"]
         result = self.tool.invoke({"urls": urls})
         assert result["count"] == 3
-        assert result["summary"] == "Found 3 URLs."
+        assert result["summary"] == "Found 3 URL(s)."
         assert result["urls"] == urls
 
     def test_summarize_no_urls(self):
         result = self.tool.invoke({"urls": []})
         assert result["count"] == 0
-        assert result["summary"] == "Found 0 URLs."
+        assert result["summary"] == "Found 0 URL(s)."
         assert result["urls"] == []
 
     def test_missing_urls_key_raises(self):
         """Missing 'urls' key should raise ValueError, not silently default."""
         with pytest.raises(ValueError, match="'urls'"):
             self.tool.invoke({})
+
+    def test_none_urls_value_raises(self):
+        """Explicit None value for 'urls' should also raise ValueError."""
+        with pytest.raises(ValueError, match="'urls'"):
+            self.tool.invoke({"urls": None})
 
     def test_output_format(self):
         """Output must contain count, summary, and urls keys."""

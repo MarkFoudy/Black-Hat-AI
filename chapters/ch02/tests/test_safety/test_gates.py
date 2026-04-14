@@ -13,7 +13,7 @@ class TestSafetyGate:
         result = safety_gate("scan", {"target": "prod.example.com"})
         assert result is False
         captured = capsys.readouterr()
-        assert "Blocked" in captured.out
+        assert "BLOCKED" in captured.out
 
     def test_blocks_payment_host(self, capsys):
         """payment.example.com is in the prohibited set."""
