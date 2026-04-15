@@ -6,8 +6,10 @@ named `src`. Running `pytest` from the repo root would normally cause
 `src` to resolve to whichever chapter's directory landed first on
 sys.path — making tests from other chapters import the wrong code.
 
-This conftest uses the `pytest_pycollect_makemodule` hook, which fires
-immediately before each test *module* is imported. At that point we:
+This conftest uses a custom Module subclass whose `collect()` method
+fixes sys.path immediately before the test module is imported (i.e. the
+import happens inside `collect()`, so fixing sys.path right before
+`super().collect()` is called is exactly the right moment).
 
   1. Identify which chapter directory the test file lives in.
   2. Clear any stale `src.*` entries from sys.modules (cached from a
@@ -22,11 +24,13 @@ repo root without renaming packages or installing chapters as packages.
 import os
 import sys
 
+from _pytest.python import Module as _BaseModule
+
 _REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 _CHAPTERS_DIR = os.path.join(_REPO_ROOT, "chapters")
 
 
-def _chapter_root_for(path) -> str | None:
+def _chapter_root_for(path):
     """Return the chapter root directory that contains *path*, or None."""
     path_str = str(path)
     try:
@@ -40,22 +44,29 @@ def _chapter_root_for(path) -> str | None:
     return None
 
 
-def pytest_pycollect_makemodule(module_path, parent):
-    """Fix sys.path before each test module is imported."""
-    chapter_root = _chapter_root_for(module_path)
-    if chapter_root is None:
-        return None  # not under chapters/; use default behaviour
-
-    # 1. Flush stale `src.*` from sys.modules so Python re-imports
-    #    from the correct chapter, not from a cached previous chapter.
+def _fix_path_for_chapter(chapter_root):
+    """Flush stale src.* from sys.modules and set sys.path to chapter_root."""
     stale = [k for k in list(sys.modules) if k == "src" or k.startswith("src.")]
     for k in stale:
         del sys.modules[k]
-
-    # 2. Remove all other chapter roots; put this chapter's root first.
     sys.path = [chapter_root] + [
         p for p in sys.path
         if not (p.startswith(_CHAPTERS_DIR + os.sep) and p != chapter_root)
     ]
 
-    return None  # use pytest's default Module class
+
+class _ChapterModule(_BaseModule):
+    """Module collector that fixes sys.path right before importing the module."""
+
+    def collect(self):
+        chapter_root = _chapter_root_for(self.path)
+        if chapter_root is not None:
+            _fix_path_for_chapter(chapter_root)
+        return super().collect()
+
+
+def pytest_pycollect_makemodule(module_path, parent):
+    """Return a chapter-aware Module collector for every file under chapters/."""
+    if _chapter_root_for(module_path) is not None:
+        return _ChapterModule.from_parent(parent, path=module_path)
+    return None  # not under chapters/; use default behaviour
