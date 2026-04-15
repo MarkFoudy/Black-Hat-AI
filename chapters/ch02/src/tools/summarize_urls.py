@@ -40,7 +40,7 @@ class SummarizeUrlsTool(Tool):
             >>> result["count"]
             1
             >>> result["summary"]
-            'Found 1 URLs.'
+            'Found 1 URL(s).'
         """
         urls = input.get("urls")
         if urls is None:

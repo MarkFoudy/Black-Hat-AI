@@ -4,7 +4,7 @@ Core abstractions for AI agent architecture.
 Provides base classes and models for:
 - Message/Observation patterns
 - Tool interface
-- Agent lifecycle (plan/act/reflect)
+- MinimalAgent orchestration
 - Artifact logging
 """
 
