@@ -106,7 +106,7 @@ def write_jsonl(
         artifact: Artifact instance or dictionary to write
         out_path: Output file path (default from RECON_OUT env var)
     """
-    if isinstance(artifact, (Artifact, ScopeArtifact)):
+    if hasattr(artifact, "to_dict") and hasattr(artifact, "ts"):
         if not artifact.ts:
             artifact.ts = _now_iso()
         data = artifact.to_dict()
