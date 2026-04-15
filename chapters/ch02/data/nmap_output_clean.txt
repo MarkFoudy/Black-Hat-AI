@@ -1,0 +1,19 @@
+Host: web01.example.com
+  22/tcp    open  ssh     OpenSSH 8.9p1
+  80/tcp    open  http    nginx 1.22.0
+  443/tcp   open  https   nginx 1.22.0
+
+Host: web02.example.com
+  22/tcp    open  ssh     OpenSSH 8.9p1
+  80/tcp    open  http    nginx 1.22.0
+  443/tcp   open  https   nginx 1.22.0
+
+Host: db01.example.com
+  22/tcp    open  ssh     OpenSSH 8.9p1
+  5432/tcp  open  postgresql  PostgreSQL 14.5
+
+Host: mail.example.com
+  22/tcp    open  ssh     OpenSSH 8.9p1
+  25/tcp    open  smtp    Postfix
+  587/tcp   open  smtp    Postfix
+  993/tcp   open  imaps   Dovecot

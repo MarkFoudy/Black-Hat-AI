@@ -1,104 +1,126 @@
 """
-Agent interface defining the plan-act-reflect cycle.
+MinimalAgent implementation.
 
-From Listing 2.4 in Black Hat AI.
+From Listing 2.6 in Black Hat AI.
 
-This module defines the abstract Agent class that implements the core
-reasoning loop used by AI agents: planning, acting, and reflecting.
+This module defines MinimalAgent, the smallest possible agent that still
+exhibits core agent behaviors: orchestrating tools, recording observations,
+and producing reproducible results — all without an AI framework.
 """
 
-from typing import List, Optional
+from typing import List
 from .models import Message, Observation
 from .tool import Tool
 
 
-class Agent:
+class MinimalAgent:
     """
-    Abstract base class for AI agents using the plan-act-reflect pattern.
+    Minimal agent implementation without framework dependencies.
 
-    The agent lifecycle consists of three phases:
-    1. Plan: Analyze conversation history and decide next action
-    2. Act: Execute the planned action using available tools
-    3. Reflect: Process the observation and update internal state
+    From Listing 2.6 in Black Hat AI Chapter 2.
 
-    Subclasses should implement these methods to create functional agents.
+    This agent demonstrates the simplest possible agent: it runs two tools
+    in sequence (extract URLs, then summarize them) without any LLM calls,
+    memory, or complex orchestration. All decision-making is explicit and
+    hardcoded.
+
+    The purpose is educational: to show the mechanics of agent execution
+    without framework abstractions obscuring the core concepts.
 
     Example:
-        class MyAgent(Agent):
-            def plan(self, history: List[Message]) -> Message:
-                # Analyze history and generate next action
-                return Message(role="agent", content="...")
-
-            def act(self, plan: Message, tools: List[Tool]) -> Observation:
-                # Execute the planned action
-                return Observation(...)
-
-            def reflect(self, observation: Observation) -> Message:
-                # Process results and produce reflection
-                return Message(role="agent", content="...")
+        with ArtifactLogger() as logger:
+            agent = MinimalAgent(
+                tools=[ExtractUrlsTool(), SummarizeUrlsTool()],
+                logger=logger,
+            )
+            result = agent.run(
+                "Check https://example.com and "
+                "https://admin.example.com/login"
+            )
+            print(result)
     """
 
-    def plan(self, history: List[Message]) -> Optional[Message]:
+    def __init__(self, tools: List[Tool], logger) -> None:
         """
-        Generate the next action or reasoning step.
-
-        Analyzes the conversation history to determine what the agent
-        should do next. This might involve:
-        - Deciding which tool to use
-        - Generating a reasoning step
-        - Formulating a response to the user
+        Initialize the minimal agent.
 
         Args:
-            history: Complete conversation history up to this point
-
-        Returns:
-            Message containing the planned action, or None if no action needed
-
-        Raises:
-            NotImplementedError: If subclass doesn't implement this method
+            tools: List of Tool instances to make available
+            logger: ArtifactLogger instance for recording observations
         """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement the plan() method"
-        )
+        self.tools = {tool.name: tool for tool in tools}
+        self.logger = logger
+        self.history: List[Message] = []
 
-    def act(self, plan: Message, tools: List[Tool]) -> Optional[Observation]:
+    def run(self, text: str):
         """
-        Execute the planned action using an appropriate tool.
+        Run the agent workflow on the provided text.
 
-        Takes the plan generated in the previous step and executes it
-        by selecting and invoking the appropriate tool from the available set.
+        This is a hardcoded two-step workflow:
+        1. Extract URLs from the text
+        2. Summarize the extracted URLs
+
+        Every tool result is wrapped in an Observation and serialized with
+        .model_dump(mode='json') before logging.
 
         Args:
-            plan: The planned action (from the plan() method)
-            tools: List of available tools the agent can use
+            text: Input text to process
 
         Returns:
-            Observation containing the execution results, or None if no action taken
-
-        Raises:
-            NotImplementedError: If subclass doesn't implement this method
+            Dictionary with "count", "summary", and "urls" keys
         """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement the act() method"
+        self.history.append(Message(role="user", content=text))
+
+        # Step 1: Extract URLs
+        try:
+            step_1_output = self.tools["extract_urls"].invoke({"text": text})
+            obs_1 = Observation(
+                tool_name="extract_urls",
+                input={"text": text},
+                output=step_1_output,
+                success=True,
+            )
+        except Exception as e:
+            obs_1 = Observation(
+                tool_name="extract_urls",
+                input={"text": text},
+                output={},
+                success=False,
+                error=str(e),
+            )
+            self.logger.write(obs_1.model_dump(mode="json"))
+            raise
+
+        self.logger.write(obs_1.model_dump(mode="json"))
+
+        # Step 2: Summarize URLs
+        try:
+            step_2_output = self.tools["summarize_urls"].invoke(step_1_output)
+            obs_2 = Observation(
+                tool_name="summarize_urls",
+                input=step_1_output,
+                output=step_2_output,
+                success=True,
+            )
+        except Exception as e:
+            obs_2 = Observation(
+                tool_name="summarize_urls",
+                input=step_1_output,
+                output={},
+                success=False,
+                error=str(e),
+            )
+            self.logger.write(obs_2.model_dump(mode="json"))
+            raise
+
+        self.logger.write(obs_2.model_dump(mode="json"))
+
+        self.history.append(
+            Message(
+                role="agent",
+                content=step_2_output["summary"],
+                meta=step_2_output,
+            )
         )
 
-    def reflect(self, observation: Observation) -> Optional[Message]:
-        """
-        Update internal memory and produce a reflection message.
-
-        Processes the observation from the action step, updating any
-        internal state (memory, knowledge base) and generating a message
-        that captures what was learned.
-
-        Args:
-            observation: The result from the act() method
-
-        Returns:
-            Message containing the agent's reflection, or None
-
-        Raises:
-            NotImplementedError: If subclass doesn't implement this method
-        """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement the reflect() method"
-        )
+        return step_2_output

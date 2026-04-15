@@ -9,8 +9,8 @@ This module defines the fundamental data structures used throughout the agent fr
 """
 
 from pydantic import BaseModel, Field
-from datetime import datetime
-from typing import Optional, Dict, Any
+from datetime import datetime, timezone
+from typing import Literal, Optional, Dict, Any
 
 
 class Message(BaseModel):
@@ -30,9 +30,9 @@ class Message(BaseModel):
         meta: Optional metadata dictionary for additional context
     """
 
-    role: str  # "system", "user", "agent", "tool"
-    content: str  # natural-language text
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    role: Literal["system", "user", "agent", "tool"]
+    content: str
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     meta: Optional[Dict[str, Any]] = None
 
 
@@ -57,4 +57,4 @@ class Observation(BaseModel):
     output: Dict[str, Any]
     success: bool
     error: Optional[str] = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

@@ -108,7 +108,7 @@ class ScopeGate(BaseGate):
             targets.extend(stage.targets if isinstance(stage.targets, list) else [stage.targets])
 
         # Check for target attribute
-        if hasattr(stage, "target"):
+        if hasattr(stage, "target") and stage.target is not None:
             targets.append(stage.target)
 
         # Check for config with targets

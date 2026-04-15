@@ -25,7 +25,8 @@ blackhat-ai/
     ch02/
     ch03/
     ch04/
-    ...
   shared/              # (introduced later) reusable components
+  conftest.py          # root pytest configuration
+  pytest.ini           # pytest settings
   README.md
-  LICENSE
+```
